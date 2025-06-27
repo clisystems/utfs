@@ -1,0 +1,15 @@
+# Ignore binary outputs
+*.bin
+*.elf
+*.hex
+*.o
+
+# Build outputs
+*.map
+
+# Download scripts
+*.jflash
+
+# Eclipse files
+.cproject
+.project
