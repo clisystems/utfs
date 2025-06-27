@@ -4,6 +4,22 @@
 
 This repository is for the UTFS file system, a lightweight storage system with named 'files', designed for use in embedded systems.  UTFS is designed for flat address space, sequential memories such as EEPROM or Flash.  UTFS is based on concepts from the TAR archive format where data is written sequentially without gaps.
 
+### Repository Contents
+
+- /Examples - This folder contains multiple projects for UTFS. Systems include SAMD20, Arduino, Linux, etc.
+- /src - This folder is the source code for the UTFS reference implementation
+- /src_minimum - This folder contains a 'minimized' version of UTFS, just the basics to read and write files
+
+### Background
+
+Microcontroller embedded systems are commonly developed as ‘bare metal’ solutions without operating system or built in libraries.  While many embedded systems do not have an operating system, it is common for the the systems to need to store and retrieve data across power cycles. This lack of system facilities leave the design of data storage to the developer.
+
+Existing file systems are designed for humans and not embedded machines.  Long file name support, directory hierarchy, permission settings, and access attributes are common in modern file systems. Microcontrollers and embedded systems do not typically need these human constructs, but these features can not typically be easily disabled in established file systems. 
+
+Data storage mediums in microcontroller systems commonly involve EEPROM, CPU flash pages, or external SPI/I2C flash chips.  These chips provide a flat, sequential address space to store arbitrary data. Microcontroller systems data storage solutions are commonly based on ‘raw’ data reads and write to these memories, data is loaded at start, and stored as needed in a fixed format.  The limitations to this are that the format is difficult to change, and commonly the system must be designed around the data storage layout.  Adding additional data after initial release typically results in an incompatible storage layout.  This could lead to data corruption, data loss, or a break backward compatibility with legacy systems. 
+
+The UTFS file system is designed to address the shortcomings in resource constrained system systems without modern file systems, provide a developer friendly interface which allows for future expansion, while maintaining a minimal code and RAM footprint. 
+
 ### Goals
 The design goals of UTFS are:
 
@@ -16,17 +32,6 @@ The design goals of UTFS are:
 - Unencumbered by proprietary or undocumented vendor formats
 - Unencumbered by patents
 - Agnostic to underlying memory architecture
-
-
-### Background
-
-Microcontroller embedded systems are commonly developed as ‘bare metal’ solutions without operating system or built in libraries.  While many embedded systems do not have an operating system, it is common for the the systems to need to store and retrieve data across power cycles. This lack of system facilities leave the design of data storage to the developer.
-
-Existing file systems are designed for humans and not embedded machines.  Long file name support, directory hierarchy, permission settings, and access attributes are common in modern file systems. Microcontrollers and embedded systems do not typically need these human constructs, but these features can not typically be easily disabled in established file systems. 
-
-Data storage mediums in microcontroller systems commonly involve EEPROM, CPU flash pages, or external SPI/I2C flash chips.  These chips provide a flat, sequential address space to store arbitrary data. Microcontroller systems data storage solutions are commonly based on ‘raw’ data reads and write to these memories, data is loaded at start, and stored as needed in a fixed format.  The limitations to this are that the format is difficult to change, and commonly the system must be designed around the data storage layout.  Adding additional data after initial release typically results in an incompatible storage layout.  This could lead to data corruption, data loss, or a break backward compatibility with legacy systems. 
-
-The UTFS file system is designed to address the shortcomings in resource constrained system systems without modern file systems, provide a developer friendly interface which allows for future expansion, while maintaining a minimal code and RAM footprint. 
 
 # Theory of Operation
 
