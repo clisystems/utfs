@@ -6,9 +6,6 @@
 
 
 typedef struct{
-    uint16_t signature;
-    uint8_t version;
-    uint8_t unused;
     uint16_t led_time_period_ms;
 }app_data_t;
 
@@ -115,9 +112,9 @@ void sys_stdin_handler(char * input)
         sys_status();
         printf("** Datastore:\n");
         datastore_command(input);
+        printf("** appfile:\n");
+        printf("  sig: 0x%X\n",appfile.signature);
         printf("** appdata:\n");
-        printf("  sig: 0x%X\n",appdata.signature);
-        printf("  ver: %d\n",appdata.version);
         printf("  time_ms: %d\n",appdata.led_time_period_ms);
     }else if(cmp_const(input,"reboot")){
         system_reset();
@@ -199,11 +196,10 @@ int main(void)
 
 
     // Handle invalid data
-    if(appdata.signature!=0xABCD){
+    if(appfile.signature!=0xABCD){
         printf("Defaulting appdata\n");
         memset(&appdata,0,sizeof(appdata));
-        appdata.signature=0xABCD;
-        appdata.version=1;
+        appfile.signature=0xABCD;
         appdata.led_time_period_ms = 100;
     }
 
