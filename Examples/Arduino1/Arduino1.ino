@@ -27,13 +27,11 @@ char m_scratch[40];
 // Data structures used in the system. This is the data
 // that will be written to the UTFS files.
 struct system_data{
-    uint8_t signature;
     char serialnumber[10];
     char modelnumber[10];
 };
 
 struct application_data{
-    uint8_t signature;
     uint8_t led_speed;
 };
 
@@ -93,11 +91,11 @@ void terminal_command(char * cmd)
     // Dump the data structures
     if(cmp_const(cmd,"dump")){
         printf("Sys:\n");
-        printf("  Sig: 0x%X\n",sysdata.signature);
+        printf("  File Sig: 0x%X\n",sysfile.signature);
         printf("  Serial: %s\n",sysdata.serialnumber);
         printf("  Model: %s\n",sysdata.modelnumber);
         printf("App:\n");
-        printf("  Sig: 0x%X\n",appdata.signature);
+        printf("  File Sig: 0x%X\n",appfile.signature);
         printf("  Speed: %d\n",appdata.led_speed);
 
     // UTFS load and save
@@ -270,7 +268,7 @@ void setup()
     if(sysfile.signature != 0xA1){
         printf("Default sysdata\n");
         memset(&sysdata,0,sizeof(sysdata));
-        sysdata.signature=0xA1;
+        sysfile.signature=0xA1;
     }
     if(appfile.signature != 0xF2){
 
