@@ -7,6 +7,7 @@
 
 typedef struct{
     uint16_t led_time_period_ms;
+    uint16_t settings_flags;
 }app_data_t;
 
 app_data_t appdata;
@@ -201,6 +202,7 @@ int main(void)
         memset(&appdata,0,sizeof(appdata));
         appfile.signature=0xABCD;
         appdata.led_time_period_ms = 100;
+        appdata.settings_flags=0;
     }
 
 	port_pin_set_output_level(LED1_PIN, LED_off);
