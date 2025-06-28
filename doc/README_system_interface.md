@@ -31,19 +31,20 @@ Data is written to the memory with a ‘save’ function.  The function informs 
 ### Constants
 
 ```
-// UTFS header handles a string of 8 characters, which is
-// a C-string of 7 characters, including \0 terminator
-#define UTFS_MAX_FILENAME   7
+// UTFS header handles a string of 12 characters, which is
+// a C-string of 11 characters, including \0 terminator
+#define UTFS_MAX_FILENAME   11
 ```
 
 ### File Data Structure
 
-UTFS data structure containing 'file name', data storage block pointer, data storage block size, flags for the driver layer (future), and variable for number of bytes loaded from the medium.
+UTFS data structure containing 'file name', file signature, data storage block pointer, data storage block size, flags for the driver layer (future), and variable for number of bytes loaded from the medium.
 
 ```
 typedef struct{
     char filename[UTFS_MAX_FILENAME+1];
-    uint32_t flags;
+    uint16_t signature;
+    uint16_t flags;
     uint32_t size;
     uint32_t size_loaded;
     void * data;
@@ -76,9 +77,6 @@ void utfs_unregister(utfs_file_t * f);
 
 utfs_result_e utfs_load();
 utfs_result_e utfs_save();
-
-utfs_result_e utfs_load_file(utfs_file_t * f);
-utfs_result_e utfs_save_file(utfs_file_t * f);
 ```
 
 ### System Interfaces

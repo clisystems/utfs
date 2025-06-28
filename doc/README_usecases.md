@@ -18,17 +18,11 @@ Sequence of operation:
 
 ```
 struct system_data {
-  uint16_t sys_signature;
-  uint8_t data_version;
-  uint8_t unused;
-  char serialnumer[10];
-  char modelnumber[10];
+  char serialnumer[12];
+  char modelnumber[12];
 }
 
 struct application_data {
-  uint16_t app_signature;
-  uint8_t data_version;
-  uint8_t app_version;
   uint32_t last_updated_timestamp;
   uint8_t current_state;
   uint8_t error_count;
@@ -60,9 +54,8 @@ void main()
 
 
   // Check data loaded to see if it needs default values, defualt values, etc
-  if(system_data.singature!=SIGNATURE_VALUE_SYS) // Invalid data, default data
-  if(system_data.data_version==1) // Upgrade to version 2 format!
-  if(application_data.singature!=SIGNATURE_VALUE_SYS) // Invalid data, default data
+  if(sys_file.singature!=SIGNATURE_VALUE_SYS) // Invalid data, default data
+  if(app_file.singature!=SIGNATURE_VALUE_APP) // Invalid data, default data
 
   // data ready to use
   while(1){
