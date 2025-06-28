@@ -71,7 +71,7 @@ Word 4 |                                   |
 Word 5 |                                   |
        -------------------------------------
 ```
-Total header size: 24bytes
+Total header size: 24 bytes
 
 ### UTFS Header Fields
 
@@ -96,7 +96,7 @@ The default endianness of the data in a UTFS header shall be little-endian
 
 ### Naming
 
-The UTFS name standsa for "Micro TAR File System", where the U is the SI unit for 10^-6, aka micro.
+The UTFS name stands for "Micro TAR File System", where the U is the SI unit for 10^-6, aka micro.
 
 The system name shall officially be printed in all uppercase letters; UTFS.
 
