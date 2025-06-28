@@ -260,7 +260,7 @@ void setup()
     }
     #endif
 
-    // Example 2: Use a 'signature' variable in the data structures
+    // Example 2: Use the 'signature' variable in the file
 
     // Check the signature after the data is loaded to see if
     // they match an expected value. If they do not match, then the

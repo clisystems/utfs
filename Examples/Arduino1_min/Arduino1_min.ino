@@ -36,13 +36,11 @@ char m_scratch[40];
 // Data structures used in the system. This is the data
 // that will be written to the UTFS files.
 struct system_data{
-    uint8_t signature;
     char serialnumber[10];
     char modelnumber[10];
 };
 
 struct application_data{
-    uint8_t signature;
     uint8_t led_speed;
 };
 
@@ -102,11 +100,11 @@ void terminal_command(char * cmd)
     // Dump the data structures
     if(cmp_const(cmd,"dump")){
         printf("Sys:\n");
-        printf("  Sig: 0x%X\n",sysdata.signature);
+        printf("  File Sig: 0x%X\n",sysfile.signature);
         printf("  Serial: %s\n",sysdata.serialnumber);
         printf("  Model: %s\n",sysdata.modelnumber);
         printf("App:\n");
-        printf("  Sig: 0x%X\n",appdata.signature);
+        printf("  File Sig: 0x%X\n",appfile.signature);
         printf("  Speed: %d\n",appdata.led_speed);
 
     // UTFS load and save
@@ -271,24 +269,24 @@ void setup()
     }
     #endif
 
-    // Example 2: Use a 'signature' variable in the data structures
+    // Example 2: Use the 'signature' variable in the file
 
     // Check the signature after the data is loaded to see if
     // they match an expected value. If they do not match, then the
     // data is not correct and set the default values
-    if(sysdata.signature != 0xA1){
+    if(sysfile.signature != 0xA1){
         printf("Default sysdata\n");
         memset(&sysdata,0,sizeof(sysdata));
-        sysdata.signature=0xA1;
+        sysfile.signature=0xA1;
     }
-    if(appdata.signature != 0xF2){
+    if(appfile.signature != 0xF2){
 
-        if(appdata.signature==0xA2){
+        if(appfile.signature==0xA2){
             // upgrade the data from an earlier structure!
         }else{
             printf("Default appdata\n");
             memset(&appdata,0,sizeof(appdata));
-            appdata.signature=0xF2;
+            appfile.signature=0xF2;
             appdata.led_speed = LED_SPEED_MED;
         }
     }
