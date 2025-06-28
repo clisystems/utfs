@@ -7,8 +7,9 @@ This repository is for the UTFS file system, a lightweight storage system with n
 ### Repository Contents
 
 - /Examples - This folder contains multiple projects for UTFS. Systems include SAMD20, Arduino, Linux, etc.
+- /docs - Documentation related to the design and implementation of UTFS
 - /src - This folder is the source code for the UTFS reference implementation
-- /src_minimum - This folder contains a 'minimized' version of UTFS, just the basics to read and write files
+
 
 ### Background
 
