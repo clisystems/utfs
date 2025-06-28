@@ -77,7 +77,7 @@ Total header size: 24bytes
 
 | Name|Size| Index |  Description|
 | --- | --- | --- | ---|
-| Idnetifier|2 bytes | 0 | Identifier for file format, constant, 0x1984|
+| Identifier|2 bytes | 0 | Identifier for file format, constant, 0x1984|
 | Version  |1 byte | 2 | Currently 1|
 | Flags |1 byte | 3 | Flags for features of the file |
 | Size     |4 bytes | 4 | Size in bytes of 'data block'|
@@ -89,6 +89,10 @@ Total header size: 24bytes
 
 # General Information
 
+
+### Endianness
+
+The default endianness of the data in a UTFS header shall be little-endian
 
 ### Naming
 
