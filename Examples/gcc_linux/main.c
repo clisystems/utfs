@@ -27,9 +27,6 @@ static uint8_t testbuffer[1024];
 // UTFS file info
 
 typedef struct{
-    uint16_t signature;
-    uint8_t version;
-    uint8_t unused;
     uint32_t test_value;
 }app_data_t;
 
@@ -78,20 +75,19 @@ void setup()
 
     // Register UTFS files
     utfs_set(&appfile,"appdata",&appdata,sizeof(appdata));
-    utfs_register(&appfile, NOFLAGS, NOOPT);
+    utfs_register(&appfile, UTFS_NOFLAGS, UTFS_NOOPT);
 
-    utfs_baseaddress_set(100);
+    //utfs_baseaddress_set(100);
 
     // Load UTFS
     ures = utfs_load();
     if(ures!=RES_OK) printf("ures: %s\n",utfs_result_str(ures));
 
     // Handle invalid data
-    if(appdata.signature!=0xABCD){
+    if(utfs_file_signature(&appfile)!=0xABCD){
         printf("Defaulting appdata\n");
         memset(&appdata,0,sizeof(appdata));
-        appdata.signature=0xABCD;
-        appdata.version=1;
+        utfs_file_signature_set(&appfile, 0xABCD);
         appdata.test_value = 1234;
     }
 
@@ -112,9 +108,12 @@ void command_process(char * input)
         g_running = false;
         return;
     }else if(cmp_const(input,"status")){
+        printf("** appfile:\n");
+        printf("  sig: 0x%04X\n",appfile.signature);
+        printf("  flags: 0x%02X\n",appfile.flags);
+        printf("  size: %d\n",appfile.size);
+        printf("  loaded: %d\n",appfile.size_loaded);
         printf("** appdata:\n");
-        printf("  sig: 0x%X\n",appdata.signature);
-        printf("  ver: %d\n",appdata.version);
         printf("  test_value: %d\n",appdata.test_value);
 
     }else if(cmp_const(input,"help")){
