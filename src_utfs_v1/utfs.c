@@ -107,7 +107,6 @@ void utfs_version_set(utfs_version_e version)
 }
 void utfs_verbose_set(bool verbose)
 {
-    //ctx.verbose = ((verbose)?((uint8_t)1):((uint8_t)0));
     ctx.verbose = (uint8_t)(verbose==true);
     return;
 }
@@ -367,9 +366,8 @@ utfs_result_e utfs_save_flush()
                 continue; //?
             }
             
-            bptr = (uint8_t*)(ctx.file_list[x]->data);
-            
             // Write data
+            bptr = (uint8_t*)(ctx.file_list[x]->data);
             sys_write(pos,bptr,ctx.file_list[x]->size);
             
             // Increment by size
@@ -519,11 +517,9 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
                 }else{
                     continue; //?
                 }
-                
-                
-                bptr = (uint8_t*)(ctx.file_list[x]->data);
 
                 // Write data
+                bptr = (uint8_t*)(ctx.file_list[x]->data);
                 sys_write(pos,bptr,ctx.file_list[x]->size);
             
                 return RES_OK;
