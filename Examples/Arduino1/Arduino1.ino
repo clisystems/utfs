@@ -27,8 +27,8 @@ char m_scratch[40];
 // Data structures used in the system. This is the data
 // that will be written to the UTFS files.
 struct system_data{
-    char serialnumber[10];
-    char modelnumber[10];
+    char serialnumber[12];
+    char modelnumber[12];
 };
 
 struct application_data{
