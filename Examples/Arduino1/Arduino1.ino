@@ -240,12 +240,12 @@ void setup()
     sprintf(sysfile.filename,"system");
     sysfile.data = &(sysdata);
     sysfile.size = sizeof(sysdata);
-    utfs_register(&sysfile, NOFLAGS, NOOPT);
+    utfs_register(&sysfile, UTFS_NOFLAGS, UTFS_NOOPT);
 
     sprintf(appfile.filename,"appdata");
     appfile.data = &(appdata);
     appfile.size = sizeof(appdata);
-    utfs_register(&appfile, NOFLAGS, NOOPT);
+    utfs_register(&appfile, UTFS_NOFLAGS, UTFS_NOOPT);
 
     // Load the UTFS data
 
@@ -267,19 +267,19 @@ void setup()
     // Check the signature after the data is loaded to see if
     // they match an expected value. If they do not match, then the
     // data is not correct and set the default values
-    if(sysdata.signature != 0xA1){
+    if(sysfile.signature != 0xA1){
         printf("Default sysdata\n");
         memset(&sysdata,0,sizeof(sysdata));
         sysdata.signature=0xA1;
     }
-    if(appdata.signature != 0xF2){
+    if(appfile.signature != 0xF2){
 
-        if(appdata.signature==0xA2){
+        if(appfile.signature==0xA2){
             // upgrade the data from an earlier structure!
         }else{
             printf("Default appdata\n");
             memset(&appdata,0,sizeof(appdata));
-            appdata.signature=0xF2;
+            appfile.signature=0xF2;
             appdata.led_speed = LED_SPEED_MED;
         }
     }

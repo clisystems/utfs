@@ -9,10 +9,10 @@
 
 // Constants
 // ----------------------------------------------------------------------------
-#ifndef UTFS_MAX_FILES
 #define UTFS_MAX_FILES      5
-#endif
-#define UTFS_MAX_FILENAME   7
+#define UTFS_MAX_FILENAME   11
+//#define UTFS_ENABLE_LOG_VPRINTF
+//#define UTFS_ENABLE_LOG_PRINTF
 
 // Types
 // ----------------------------------------------------------------------------
@@ -28,7 +28,8 @@ typedef enum{
 
 typedef struct{
     char filename[UTFS_MAX_FILENAME+1];
-    uint32_t flags;
+    uint16_t signature;
+    uint16_t flags;
     uint32_t size;
     uint32_t size_loaded;
     void * data;

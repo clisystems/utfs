@@ -54,7 +54,7 @@ This header+data structure is repeated with the next file in the archive.  This 
 
 Resource constrained systems may not have the ability to load and store 512 byte blocks.  Additionally, embedded systems commonly do not need the TAR header user, group, permissions, and extended settings, resulting in wasted space on the storage medium.
 
-The UTFS system implements a 16 byte header with information about the ‘file’, including signature, data size, and a string for reference in the system.
+The UTFS system implements a 24 byte header with information about the ‘file’, including file system identifier, feature flags, file signature, data size, and a string for reference in the system.
 
 After the header, data is written, up to the size specified in the header.
 
@@ -64,23 +64,30 @@ After the header, data is written, up to the size specified in the header.
        | Byte0  | Byte1  | Byte2  | Byte3  |
 
        -------------------------------------
-Word 0 |    Signature    |Version |Reserved|
+Word 0 |    Identifier   |Version | Flags  |
        -------------------------------------
 Word 1 |                Size               |
        -------------------------------------
-Word 2 |              Filename             |
-Word 3 |                                   |
+Word 2 |   Signature     |    Reserved     |
+       -------------------------------------
+Word 3 |              Filename             |
+Word 4 |                                   |
+Word 5 |                                   |
        -------------------------------------
 ```
+Total header size: 24bytes
+
 ### UTFS Header Fields
 
 | Name|Size| Index |  Description|
 | --- | --- | --- | ---|
-| Signature|2 bytes | 0 | Signature for file format, currently 0x1984|
-| Version  |1 byte | 2 | Currently 0|
-| Reserved |1 byte | 3 | |
+| Idnetifier|2 bytes | 0 | Identifier for file format, constant, 0x1984|
+| Version  |1 byte | 2 | Currently 1|
+| Flags |1 byte | 3 | Flags for features of the file |
 | Size     |4 bytes | 4 | Size in bytes of 'data block'|
-| Filename |8 bytes | 8 | Human readable string to associate data|
+| Signature |2 bytes | 8 | Signature value for file, set by application |
+| Reserved |2 bytes | 10 | |
+| Filename |12 bytes | 12 | Human readable string to associate data|
 
 
 
@@ -89,7 +96,7 @@ Word 3 |                                   |
 
 ### Naming
 
-The UTFS name is derived from "Micro TAR File System".
+The UTFS name standsa for "Micro TAR File System", where the U is the SI unit for 10^-6, aka micro.
 
 The system name shall officially be printed in all uppercase letters; UTFS.
 

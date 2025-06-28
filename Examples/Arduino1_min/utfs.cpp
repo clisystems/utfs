@@ -39,18 +39,20 @@ extern char m_scratch[40]; // m_scrach defined in .ino file
 
 // Definitions
 // ----------------------------------------------------------------------------
-#define UTFS_SIGNATURE      0x1984
-#define UTFS_VERSION        0
+#define UTFS_IDENTIFIER     0x1984
+#define UTFS_VERSION_V1     1
 
 
 // Types
 // ----------------------------------------------------------------------------
 typedef struct{
-    uint16_t signature;
+    uint16_t ident;
     uint8_t version;
-    uint8_t unused;
+    uint8_t flags;
+    uint16_t signature;
+    uint16_t unused;
     uint32_t size;
-    char filename[8];
+    char filename[12];
 }utfs_header_t;
 
 
@@ -135,7 +137,7 @@ utfs_result_e utfs_load()
     {
         // Read the header
         f = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(f<=0 || header.signature != UTFS_SIGNATURE)
+        if(f<=0 || header.ident != UTFS_IDENTIFIER)
         {
             break;
         }
@@ -159,6 +161,9 @@ utfs_result_e utfs_load()
         }else if(file_list[f]->data==NULL){
             _utfs_log("Null data, skipping\n");            
             file_list[f]->size_loaded=0;
+            file_list[f]->signature=header.signature;
+            file_list[f]->flags&=(0xFF00); // blank the lower byte
+            file_list[f]->flags|=header.flags; // Add in the lower byte flags from the header
             
         }else{
             uint32_t s;
@@ -173,6 +178,9 @@ utfs_result_e utfs_load()
             // Read in the data
             sys_read(pos, file_list[f]->data, s);
             file_list[f]->size_loaded=s;
+            file_list[f]->signature=header.signature;
+            file_list[f]->flags&=(0xFF00); // blank the lower byte
+            file_list[f]->flags|=header.flags; // Add in the lower byte flags from the header
         }
         pos += header.size;
     }
@@ -202,10 +210,11 @@ utfs_result_e utfs_save()
         if(file_list[x]!=NULL)
         {
             _utfs_log("Writing file %d at pos %d\n",x,pos);
-            
             memset(&header,0,sizeof(header));
-            header.signature = UTFS_SIGNATURE;
-            header.version = UTFS_VERSION;
+            header.ident = UTFS_IDENTIFIER;
+            header.version = UTFS_VERSION_V1;
+            header.flags = ((file_list[x]->flags)&0x00FF);   // Save the lower byte of the flags
+            header.signature = file_list[x]->signature;
             header.unused = 0;
             header.size = file_list[x]->size;
             strncpy((char*)(header.filename),file_list[x]->filename,UTFS_MAX_FILENAME);

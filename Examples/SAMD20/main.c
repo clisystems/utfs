@@ -187,7 +187,7 @@ int main(void)
 
 	// Configure UTFS files
 	utfs_set(&appfile,"appdata",&appdata,sizeof(appdata));
-    utfs_register(&appfile, NOFLAGS, NOOPT);
+    utfs_register(&appfile, UTFS_NOFLAGS, UTFS_NOOPT);
 
     // Load the UTFS data
 

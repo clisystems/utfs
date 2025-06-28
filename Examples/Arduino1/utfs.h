@@ -10,7 +10,9 @@
 // Constants
 // ----------------------------------------------------------------------------
 #define UTFS_MAX_FILES      5
-#define UTFS_MAX_FILENAME   7
+#define UTFS_MAX_FILENAME   11
+//#define UTFS_ENABLE_LOG_VPRINTF
+//#define UTFS_ENABLE_LOG_PRINTF
 
 // Types
 // ----------------------------------------------------------------------------
@@ -26,23 +28,37 @@ typedef enum{
 
 typedef struct{
     char filename[UTFS_MAX_FILENAME+1];
-    uint32_t flags;
+    uint16_t signature;
+    uint16_t flags;
     uint32_t size;
     uint32_t size_loaded;
+#ifdef UTFS_ENABLE_EXT_ATTR
+    uint32_t attr[4];
+#endif
     void * data;
 }utfs_file_t;
 
+// Flags related to files
+//   UTS_EXT_ATTR (Experimental) - Header has extended attributes
+//   UTS_LOAD_EXPLICIT (Experimental) - Only load the file with a call from utfs_load_file()
+//   UTS_SAVE_EXPLICIT (Experimental) - Only save the file with a call from utfs_save_file() or utfs_save_flush()
 typedef enum{
-	NOFLAGS			= 0,
+	UTFS_NOFLAGS			= 0,
 #ifdef UTFS_ENABLE_FLAGS
-    LOAD_EXPLICIT   = 0x01,
-    SAVE_EXPLICIT   = 0x02,
+#ifdef UTFS_ENABLE_EXT_ATTR
+    UTFS_EXT_ATTR       = 0x0001
+#endif
+    UTFS_LOAD_EXPLICIT  = 0x0100,
+    UTFS_SAVE_EXPLICIT  = 0x0200,
 #endif
 }utfs_flags_e;
 
+
+// Options for managing files.
+//   UTFS_OPT_REPLACE - Replace an entry in the file list, if it already exists
 typedef enum{
-    NOOPT           = 0,
-    OPT_REPLACE     = 0x01,
+    UTFS_NOOPT           = 0,
+    UTFS_OPT_REPLACE     = 0x01,
 }utfs_options_e;
 
 // Functions
@@ -73,6 +89,10 @@ utfs_result_e utfs_save_file(utfs_file_t * f);
 bool utfs_set(utfs_file_t * f,char * name, void * data, uint32_t size);
 bool utfs_set_filename(utfs_file_t * f,char * name);
 bool utfs_set_data(utfs_file_t *f,void * data, uint32_t size);
+
+uint16_t utfs_file_signature(utfs_file_t * f);
+bool utfs_file_signature_set(utfs_file_t * f, uint16_t sig);
+
 const char * utfs_result_str(utfs_result_e res);
 
 /// Debug

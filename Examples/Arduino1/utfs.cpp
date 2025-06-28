@@ -38,18 +38,20 @@ extern char m_scratch[40]; // m_scrach defined in .ino file
 
 // Definitions
 // ----------------------------------------------------------------------------
-#define UTFS_SIGNATURE_V0   0x1984
-#define UTFS_VERSION_V0     0
+#define UTFS_IDENTIFIER     0x1984
+#define UTFS_VERSION_V1     1
 
 
 // Types
 // ----------------------------------------------------------------------------
 typedef struct{
-    uint16_t signature;
+    uint16_t ident;
     uint8_t version;
-    uint8_t unused;
+    uint8_t flags;
+    uint16_t signature;
+    uint16_t unused;
     uint32_t size;
-    char filename[8];
+    char filename[12];
 }utfs_header_t;
 
 
@@ -78,8 +80,8 @@ bool utfs_init(bool verbose)
     _structure_saved=false;
     _utfs_verbose=verbose;
     _baseaddr=0;
-    _utfs_log("_utfs_verbose: %d\n",_utfs_verbose);
-    _utfs_log("utfs_file_t size: %ld bytes\n",sizeof(utfs_file_t));
+    //_utfs_log("_utfs_verbose: %d\n",_utfs_verbose);
+    //_utfs_log("utfs_file_t size: %ld bytes\n",sizeof(utfs_file_t));
     return true;
 }
 
@@ -102,7 +104,7 @@ bool utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
             file_list[x] = f;
             return RES_OK;
         }else if(strncmp(file_list[x]->filename,f->filename,UTFS_MAX_FILENAME+1)
-                    && (options&OPT_REPLACE)==0){
+                    && (options&UTFS_OPT_REPLACE)==0){
             _utfs_log("Found %s=%s, replacing\n",file_list[x]->filename,f->filename);
             file_list[x] = f;
             return RES_OK;
@@ -144,7 +146,7 @@ utfs_result_e utfs_load()
     {
         // Read the header
         f = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(f<=0 || header.signature != UTFS_SIGNATURE_V0)
+        if(f<=0 || header.ident != UTFS_IDENTIFIER)
         {
             break;
         }
@@ -169,6 +171,9 @@ utfs_result_e utfs_load()
         }else if(file_list[f]->data==NULL){
             _utfs_log("Null data, skipping\n");            
             file_list[f]->size_loaded=0;
+            file_list[f]->signature=header.signature;
+            file_list[f]->flags&=(0xFF00); // blank the lower byte
+            file_list[f]->flags|=header.flags; // Add in the lower byte flags from the header
             
         }else{
             uint32_t s;
@@ -189,9 +194,14 @@ utfs_result_e utfs_load()
             {
                 sys_read(pos, file_list[f]->data, s);
                 file_list[f]->size_loaded=s;
+                file_list[f]->signature=header.signature;
+                file_list[f]->flags&=(0xFF00); // blank the lower byte
+                file_list[f]->flags|=header.flags; // Add in the lower byte flags from the header
             }else{
                 _utfs_log("LOAD_EXPLICIT set, skipping read '%s'\n",header.filename);
                 file_list[f]->size_loaded=0;
+                file_list[f]->signature=0;
+                file_list[f]->flags&=(0xFF00); // blank the lower byte
             }
             
         }
@@ -224,8 +234,10 @@ utfs_result_e utfs_save()
         {
             _utfs_log("Writing file %d at pos %d\n",x,pos);
             memset(&header,0,sizeof(header));
-            header.signature = UTFS_SIGNATURE_V0;
-            header.version = UTFS_VERSION_V0;
+            header.ident = UTFS_IDENTIFIER;
+            header.version = UTFS_VERSION_V1;
+            header.flags = ((file_list[x]->flags)&0x00FF);   // Save the lower byte of the flags
+            header.signature = file_list[x]->signature;
             header.unused = 0;
             header.size = file_list[x]->size;
             strncpy((char*)(header.filename),file_list[x]->filename,UTFS_MAX_FILENAME);
@@ -274,8 +286,10 @@ utfs_result_e utfs_save_flush()
         {
             _utfs_log("Writing file %d at pos %d\n",x,pos);
             memset(&header,0,sizeof(header));
-            header.signature = UTFS_SIGNATURE_V0;
-            header.version = UTFS_VERSION_V0;
+            header.ident = UTFS_IDENTIFIER;
+            header.version = UTFS_VERSION_V1;
+            header.flags = ((file_list[x]->flags)&0x00FF);   // Save the lower byte of the flags
+            header.signature = file_list[x]->signature;
             header.unused = 0;
             header.size = file_list[x]->size;
             strncpy((char*)(header.filename),file_list[x]->filename,UTFS_MAX_FILENAME);
@@ -315,7 +329,7 @@ utfs_result_e utfs_load_file(utfs_file_t * f)
     {
         // Read the header
         i = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(i<=0 || header.signature != UTFS_SIGNATURE_V0)
+        if(i<=0 || header.ident != UTFS_IDENTIFIER)
         {
             return RES_FILE_NOT_FOUND;
         }
@@ -349,7 +363,10 @@ utfs_result_e utfs_load_file(utfs_file_t * f)
         // Read in the data
         sys_read(pos, file_list[x]->data, s);
         file_list[x]->size_loaded=s;
-        
+        file_list[x]->signature=header.signature;
+        file_list[x]->flags&=(0xFF00); // blank the lower byte
+        file_list[x]->flags|=header.flags; // Add in the lower byte flags from the header
+                        
         // Good
         return RES_OK;
     }
@@ -383,8 +400,10 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
             {
                 _utfs_log("Writing file %s, id %d at pos %d\n",f->filename,x,pos);
                 memset(&header,0,sizeof(header));
-                header.signature = UTFS_SIGNATURE_V0;
-                header.version = UTFS_VERSION_V0;
+                header.ident = UTFS_IDENTIFIER;
+                header.version = UTFS_VERSION_V1;
+                header.flags = ((file_list[x]->flags)&0x00FF);   // Save the lower byte of the flags
+                header.signature = file_list[x]->signature;
                 header.unused = 0;
                 header.size = file_list[x]->size;
                 strncpy((char*)(header.filename),file_list[x]->filename,UTFS_MAX_FILENAME);
@@ -427,6 +446,17 @@ bool utfs_set_data(utfs_file_t *f,void * data,uint32_t size)
     f->size = size;
     return true;
 }
+uint16_t utfs_file_signature(utfs_file_t * f)
+{
+    if(!f) return 0;
+    return f->signature;
+}
+bool utfs_file_signature_set(utfs_file_t * f, uint16_t sig)
+{
+    if(!f) return false;
+    f->signature=sig;
+    return true;
+}
 const char * utfs_result_str(utfs_result_e res)
 {
     switch(res){
@@ -440,7 +470,6 @@ const char * utfs_result_str(utfs_result_e res)
     }
     return "RES_UNKOWN";
 }
-
 
 /// Debug functions
 void utfs_status()
@@ -464,12 +493,13 @@ void utfs_status()
 static void _print_header(utfs_header_t * header)
 {
     printf("Header:\n");
-    printf(" signature: 0x%04X\n",header->signature);
+    printf(" ident: 0x%04X\n",header->ident);
     printf(" version: %d\n",header->version);
-    printf(" unused: 0x%02X\n",header->unused);
+    printf(" flags: 0x%02X\n",header->flags);
+    printf(" signature: 0x%04X\n",header->signature);
+    printf(" unused: 0x%04X\n",header->unused);
     printf(" size: %d\n",header->size);
     printf(" filename: '%s'\n",header->filename);
-    printf(" baseaddr: 0x%08X\n",_baseaddr);
     return;
 }
 
