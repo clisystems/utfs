@@ -136,10 +136,12 @@ utfs_result_e utfs_load()
 {
     uint8_t * bptr;
     uint32_t x,f;
-    uint32_t pos=0;
+    uint32_t pos;
     utfs_header_t header;
     
     memset(&header,0,sizeof(header));
+
+    pos = _baseaddr;
 
     // Read up to UTFS_MAX_FILES files
     for(x=0;x<UTFS_MAX_FILES;x++)
