@@ -4,10 +4,6 @@
 
 This repository is for the UTFS file system, a lightweight storage system with named 'files', designed for use in embedded systems.  UTFS is designed for flat address space, sequential memories such as EEPROM or Flash.  UTFS is based on concepts from the TAR archive format where data is written sequentially without gaps.
 
-### Release Status
-
-The UTFS data layout, and the UTFS interface are still a work in progress and should be considered alpha software at this point.
-
 ### Repository Contents
 
 - /Examples - This folder contains multiple projects for UTFS. Systems include SAMD20, Arduino, Linux, etc.
