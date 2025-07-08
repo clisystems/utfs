@@ -91,8 +91,8 @@ Total header size: 24 bytes
 
 ### In-depth articles on UTFS
 
-- Using UTFS in an Embedded System - https://clisystems.com/article-UTFS-examples.php
 - UTFS a Tar-like File System for Embedded Systems - https://clisystems.com/article-UTFS.php
+- Using UTFS in an Embedded System - https://clisystems.com/article-UTFS-examples.php
 
 
 ### Endianness
