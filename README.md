@@ -10,7 +10,6 @@ This repository is for the UTFS file system, a lightweight storage system with n
 - /docs - Documentation related to the design and implementation of UTFS
 - /src - This folder is the source code for the UTFS reference implementation
 
-
 ### Background
 
 Microcontroller embedded systems are commonly developed as ‘bare metal’ solutions without operating system or built in libraries.  While many embedded systems do not have an operating system, it is common for the the systems to need to store and retrieve data across power cycles. This lack of system facilities leave the design of data storage to the developer.
@@ -89,6 +88,11 @@ Total header size: 24 bytes
 
 
 # General Information
+
+### In-depth articles on UTFS
+
+- Using UTFS in an Embedded System - https://clisystems.com/article-UTFS-examples.php
+- UTFS a Tar-like File System for Embedded Systems - https://clisystems.com/article-UTFS.php
 
 
 ### Endianness
