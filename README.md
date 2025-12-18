@@ -18,7 +18,7 @@ Existing file systems like FAT and EXT4 are designed for humans and not embedded
 
 Data storage for microcontroller systems commonly involve EEPROMs, CPU flash pages, or external SPI/I2C flash chips.  These chips provide a flat, sequential address space to store arbitrary data. Microcontroller systems data storage solutions are commonly based on ‘raw’ data reads and write to these memories, data is loaded at start, and stored as needed in a fixed format.  The limitations to this are that the format is difficult to change, and commonly the system must be designed around the data storage layout.  Adding additional data after initial release typically results in an incompatible storage layout.  This could lead to data corruption, data loss, or a break backward compatibility with legacy systems. 
 
-The UTFS file system is designed to address some of the shortcomings in resource constrained system systems without modern file systems, provide a developer friendly interface which allows for future expansion, while maintaining a minimal code and RAM footprint. 
+The UTFS file system is designed to address some of the shortcomings in resource constrained systems without modern file systems, provide a developer friendly interface which allows for future expansion, while maintaining a minimal code and RAM footprint. 
 
 ### Goals
 The design goals of UTFS are:
