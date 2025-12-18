@@ -12,13 +12,13 @@ This repository is for the UTFS file system, a lightweight storage system with n
 
 ### Background
 
-Microcontroller embedded systems are commonly developed as ‘bare metal’ solutions without operating system or built in libraries.  While many embedded systems do not have an operating system, it is common for the the systems to need to store and retrieve data across power cycles. This lack of system facilities leave the design of data storage to the developer.
+Microcontroller embedded systems are commonly developed as ‘bare metal’ solutions without operating system or built in libraries.  While many embedded systems do not have an operating system, it is common for the the systems to store and retrieve data across power cycles. This lack of system facilities leave the design of data storage to the developer.
 
-Existing file systems are designed for humans and not embedded machines.  Long file name support, directory hierarchy, permission settings, and access attributes are common in modern file systems. Microcontrollers and embedded systems do not typically need these human constructs, but these features can not typically be easily disabled in established file systems. 
+Existing file systems like FAT and EXT4 are designed for humans and not embedded machines.  Long file name support, directory hierarchy, permission settings, and access attributes are common in modern file systems. Microcontrollers and embedded systems do not typically need these human constructs, but these features are typically not easy to disable. 
 
-Data storage mediums in microcontroller systems commonly involve EEPROM, CPU flash pages, or external SPI/I2C flash chips.  These chips provide a flat, sequential address space to store arbitrary data. Microcontroller systems data storage solutions are commonly based on ‘raw’ data reads and write to these memories, data is loaded at start, and stored as needed in a fixed format.  The limitations to this are that the format is difficult to change, and commonly the system must be designed around the data storage layout.  Adding additional data after initial release typically results in an incompatible storage layout.  This could lead to data corruption, data loss, or a break backward compatibility with legacy systems. 
+Data storage for microcontroller systems commonly involve EEPROMs, CPU flash pages, or external SPI/I2C flash chips.  These chips provide a flat, sequential address space to store arbitrary data. Microcontroller systems data storage solutions are commonly based on ‘raw’ data reads and write to these memories, data is loaded at start, and stored as needed in a fixed format.  The limitations to this are that the format is difficult to change, and commonly the system must be designed around the data storage layout.  Adding additional data after initial release typically results in an incompatible storage layout.  This could lead to data corruption, data loss, or a break backward compatibility with legacy systems. 
 
-The UTFS file system is designed to address the shortcomings in resource constrained system systems without modern file systems, provide a developer friendly interface which allows for future expansion, while maintaining a minimal code and RAM footprint. 
+The UTFS file system is designed to address some of the shortcomings in resource constrained system systems without modern file systems, provide a developer friendly interface which allows for future expansion, while maintaining a minimal code and RAM footprint. 
 
 ### Goals
 The design goals of UTFS are:
@@ -62,9 +62,9 @@ After the header, data is written, up to the size specified in the header.
        -------------------------------------
 Word 0 |    Identifier   |Version | Flags  |
        -------------------------------------
-Word 1 |                Size               |
+Word 1 |   Signature     |    Reserved     |
        -------------------------------------
-Word 2 |   Signature     |    Reserved     |
+Word 2 |                Size               |
        -------------------------------------
 Word 3 |              Filename             |
 Word 4 |                                   |
@@ -80,9 +80,9 @@ Total header size: 24 bytes
 | Identifier|2 bytes | 0 | Identifier for file format, constant, 0x1984|
 | Version  |1 byte | 2 | Currently 1|
 | Flags |1 byte | 3 | Flags for features of the file |
-| Size     |4 bytes | 4 | Size in bytes of 'data block'|
-| Signature |2 bytes | 8 | Signature value for file, set by application |
-| Reserved |2 bytes | 10 | |
+| Signature |2 bytes | 4 | Signature value for file, set by application |
+| Reserved |2 bytes | 6 | |
+| Size     |4 bytes | 8 | Size in bytes of 'data block'|
 | Filename |12 bytes | 12 | Human readable string to associate data|
 
 
