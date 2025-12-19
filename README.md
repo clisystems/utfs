@@ -54,6 +54,8 @@ The UTFS system implements a 24 byte header with information about the â€˜fileâ€
 
 After the header, data is written, up to the size specified in the header.
 
+Subsequent file are writen header+data directly after the data from the previous file.
+
 # UTFS Data Structure
 
 ```
