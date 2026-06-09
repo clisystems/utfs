@@ -80,6 +80,8 @@ void main()
 
 Flags are a proposed feature of the UTFS interface.  Flags can provide flexibility for integrating with existing systems that don't follow the typical UTFS paradigm.
 
+At the time of writing, these flags are not a finalized part of the UTFS logic.
+
 **FLAG_LOADEXPLICT**
 This flag exists to allow the system to load a specific file on-demand, and not at the typical call to the utfs_load() function, which would load all files.
 
@@ -90,3 +92,5 @@ This flag should be used with caution, as any call to the utfs_save() function w
 This flag exists to allow the system to save a specific file on-demand, and not at the typical call to the UTFS save() function, which would save all files.
 
 This flag should be used with caution, as a call to utfs_save() followed by a restart could cause any data in the current RAM of the explicit file to not be saved to the medium.
+
+Another corner case is where an explicit file grows after the 'structure' of the other files is written to the medium, and then the explicit file is written.  This could use the explicit file to overwrite the files after it on the medium.

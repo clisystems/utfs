@@ -99,7 +99,9 @@ Total header size: 24 bytes
 
 ### Endianness
 
-The default endianness of the data in a UTFS header shall be little-endian
+The default endianness of the data in a UTFS header shall be little-endian.
+
+Hardware in big-endian shall provide logic to store header data in little-endian format on the medium.
 
 ### Naming
 
