@@ -13,3 +13,5 @@
 # Eclipse files
 .cproject
 .project
+
+C.*md
