@@ -96,11 +96,16 @@ utfs_result_e utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e 
             _utfs_log("Found empty slot %d\n",x);
             file_list[x] = f;
             return RES_OK;
-        }else if(strncmp(file_list[x]->filename,f->filename,UTFS_MAX_FILENAME+1)==0
-                    && (options&UTFS_OPT_REPLACE)==0){
-            _utfs_log("Found %s=%s, replacing\n",file_list[x]->filename,f->filename);
-            file_list[x] = f;
-            return RES_OK;
+        }else if(strncmp(file_list[x]->filename,f->filename,UTFS_MAX_FILENAME+1)==0){
+            if((options&UTFS_OPT_REPLACE)==UTFS_OPT_REPLACE)
+            {
+                _utfs_log("Found %s=%s, replacing\n",file_list[x]->filename,f->filename);
+                file_list[x] = f;
+                return RES_OK;
+            }else{
+                _utfs_log("Found %s, NOT overwriting\n",f->filename);
+                return RES_FILENAME_EXISTS;
+            }
         }
     }
     if(x==UTFS_MAX_FILES){
@@ -151,11 +156,14 @@ utfs_result_e utfs_load()
         // Find the file
         for(f=0;f<UTFS_MAX_FILES;f++)
         {
+            if(file_list[f]==NULL) continue;
+            
             if(strncmp(file_list[f]->filename,header.filename,UTFS_MAX_FILENAME+1)==0)
             {
                 _utfs_log("Found match, position %d\n",f);
                 break;
             }
+        
         }
         
         // Handle data
@@ -315,7 +323,7 @@ utfs_result_e utfs_load_file(utfs_file_t * f)
     uint32_t pos;
     utfs_header_t header;
     
-    if(!f) return RES_FILE_NOT_FOUND;
+    if(!f) return RES_PARAM_ERROR;
 
     pos = _baseaddr;
 
@@ -331,7 +339,7 @@ utfs_result_e utfs_load_file(utfs_file_t * f)
         pos += sizeof(header);
         
         // is it a match?
-        if(strncmp(f->filename,file_list[x]->filename,UTFS_MAX_FILENAME)!=0)
+        if(file_list[x]==NULL || strncmp(f->filename,file_list[x]->filename,UTFS_MAX_FILENAME+1)!=0)
         {
             // No, just skip the data
             pos += header.size;
@@ -376,7 +384,7 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
     uint32_t pos;
     utfs_header_t header;
     
-    if(!f) return RES_FILE_NOT_FOUND;
+    if(!f) return RES_PARAM_ERROR;
     
     // We can't save an individual file until the full set of files
     // have been written, so write them first
@@ -391,7 +399,7 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
     {
         if(file_list[x]!=NULL)
         {
-            if(strncmp(f->filename,file_list[x]->filename, UTFS_MAX_FILENAME)==0)
+            if(strncmp(f->filename,file_list[x]->filename, UTFS_MAX_FILENAME+1)==0)
             {
                 _utfs_log("Writing file %s, id %d at pos %d\n",f->filename,x,pos);
                 memset(&header,0,sizeof(header));
