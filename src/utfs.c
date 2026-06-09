@@ -67,7 +67,7 @@ static inline void _utfs_log(const char *fmt, ...)
 
 // Public functions
 // ----------------------------------------------------------------------------
-bool utfs_init(bool verbose)
+utfs_result_e utfs_init(bool verbose)
 {
     memset(file_list,0,sizeof(file_list));
     _structure_saved=false;
@@ -75,19 +75,19 @@ bool utfs_init(bool verbose)
     _baseaddr=0;
     _utfs_log("_utfs_verbose: %d\n",_utfs_verbose);
     _utfs_log("utfs_file_t size: %ld bytes\n",sizeof(utfs_file_t));
-    return true;
+    return RES_OK;
 }
 
-void utfs_baseaddress_set(uint32_t baseaddr)
+utfs_result_e utfs_baseaddress_set(uint32_t baseaddr)
 {
     _baseaddr = baseaddr;
-    return;
+    return RES_OK;
 }
 
-bool utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
+utfs_result_e utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
 {
     int x;
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     f->flags = flags;
     for(x=0;x<UTFS_MAX_FILES;x++)
     {
@@ -96,7 +96,7 @@ bool utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
             _utfs_log("Found empty slot %d\n",x);
             file_list[x] = f;
             return RES_OK;
-        }else if(strncmp(file_list[x]->filename,f->filename,UTFS_MAX_FILENAME+1)
+        }else if(strncmp(file_list[x]->filename,f->filename,UTFS_MAX_FILENAME+1)==0
                     && (options&UTFS_OPT_REPLACE)==0){
             _utfs_log("Found %s=%s, replacing\n",file_list[x]->filename,f->filename);
             file_list[x] = f;
@@ -110,19 +110,19 @@ bool utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
     return RES_OK;
 }
 
-void utfs_unregister(utfs_file_t * f)
+utfs_result_e utfs_unregister(utfs_file_t * f)
 {
     int x;
-    if(!f) return;
+    if(!f) return RES_PARAM_ERROR;
     for(x=0;x<UTFS_MAX_FILES;x++)
     {
         if(file_list[x]==f){
             _utfs_log("Removed %s at position %d\n",file_list[x]->filename,x);
             file_list[x] = NULL;
-            return;
+            return RES_OK;
         }
     }
-    return;
+    return RES_FILE_NOT_FOUND;
 }
 
 utfs_result_e utfs_load()
@@ -420,37 +420,37 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
 }
 
 /// Utility functions
-bool utfs_set(utfs_file_t * f,char * name, void * data,uint32_t size)
+utfs_result_e utfs_set(utfs_file_t * f,char * name, void * data,uint32_t size)
 {
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     strncpy(f->filename,name,UTFS_MAX_FILENAME);
     f->data = data;
     f->size = size;
-    return true;
+    return RES_OK;
 }
-bool utfs_set_filename(utfs_file_t * f,char * name)
+utfs_result_e utfs_set_filename(utfs_file_t * f,char * name)
 {
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     strncpy(f->filename,name,UTFS_MAX_FILENAME);
-    return true;
+    return RES_OK;
 }
-bool utfs_set_data(utfs_file_t *f,void * data,uint32_t size)
+utfs_result_e utfs_set_data(utfs_file_t *f,void * data,uint32_t size)
 {
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     f->data = data;
     f->size = size;
-    return true;
+    return RES_OK;
 }
 uint16_t utfs_file_signature(utfs_file_t * f)
 {
     if(!f) return 0;
     return f->signature;
 }
-bool utfs_file_signature_set(utfs_file_t * f, uint16_t sig)
+utfs_result_e utfs_file_signature_set(utfs_file_t * f, uint16_t sig)
 {
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     f->signature=sig;
-    return true;
+    return RES_OK;
 }
 const char * utfs_result_str(utfs_result_e res)
 {
@@ -459,6 +459,7 @@ const char * utfs_result_str(utfs_result_e res)
     case RES_FILE_NOT_FOUND: return "RES_FILE_NOT_FOUND";
     case RES_READ_ERROR: return "RES_READ_ERROR";
     case RES_WRITE_ERROR: return "RES_WRITE_ERROR";
+    case RES_PARAM_ERROR: return "RES_PARAM_ERROR";
     case RES_FILENAME_EXISTS: return "RES_FILENAME_EXISTS";
     case RES_FILESYSTEM_FULL: return "RES_FILESYSTEM_FULL";
     case RES_INVALID_FS: return "RES_INVALID_FS";
@@ -467,7 +468,7 @@ const char * utfs_result_str(utfs_result_e res)
 }
 
 /// Debug functions
-void utfs_status()
+utfs_result_e utfs_status()
 {
     int x;
     int count=0;
@@ -480,7 +481,7 @@ void utfs_status()
         }
     }
     if(count<=0) printf("No UTFS entries found\n");
-    return;
+    return RES_OK;
 }
 
 // Private functions
