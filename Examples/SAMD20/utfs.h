@@ -21,6 +21,7 @@ typedef enum{
     RES_FILE_NOT_FOUND,
     RES_READ_ERROR,
     RES_WRITE_ERROR,
+    RES_PARAM_ERROR,
     RES_FILENAME_EXISTS,
     RES_FILESYSTEM_FULL,
     RES_INVALID_FS,
@@ -68,12 +69,12 @@ extern "C"
 {
 #endif
 
-bool utfs_init(bool verbose);
+utfs_result_e utfs_init(bool verbose);
 
-void utfs_baseaddress_set(uint32_t baseaddr);
+utfs_result_e utfs_baseaddress_set(uint32_t baseaddr);
 
-bool utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options);
-void utfs_unregister(utfs_file_t * f);
+utfs_result_e utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options);
+utfs_result_e utfs_unregister(utfs_file_t * f);
 
 utfs_result_e utfs_load();
 utfs_result_e utfs_save();
@@ -86,17 +87,17 @@ utfs_result_e utfs_save_file(utfs_file_t * f);
 
 
 /// Utility functions
-bool utfs_set(utfs_file_t * f,char * name, void * data, uint32_t size);
-bool utfs_set_filename(utfs_file_t * f,char * name);
-bool utfs_set_data(utfs_file_t *f,void * data, uint32_t size);
+utfs_result_e utfs_set(utfs_file_t * f,char * name, void * data, uint32_t size);
+utfs_result_e utfs_set_filename(utfs_file_t * f,char * name);
+utfs_result_e utfs_set_data(utfs_file_t *f,void * data, uint32_t size);
 
 uint16_t utfs_file_signature(utfs_file_t * f);
-bool utfs_file_signature_set(utfs_file_t * f, uint16_t sig);
+utfs_result_e utfs_file_signature_set(utfs_file_t * f, uint16_t sig);
 
 const char * utfs_result_str(utfs_result_e res);
 
 /// Debug
-void utfs_status();
+utfs_result_e utfs_status();
 
 #ifdef __cplusplus
 }
