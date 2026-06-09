@@ -14,4 +14,4 @@
 .cproject
 .project
 
-C.*md
+C*md
