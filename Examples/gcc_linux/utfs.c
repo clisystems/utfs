@@ -132,7 +132,6 @@ utfs_result_e utfs_unregister(utfs_file_t * f)
 
 utfs_result_e utfs_load()
 {
-    uint8_t * bptr;
     uint32_t x,f;
     uint32_t pos;
     utfs_header_t header;
@@ -146,7 +145,7 @@ utfs_result_e utfs_load()
     {
         // Read the header
         f = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(f<=0 || header.ident != UTFS_IDENTIFIER)
+        if(f<=0 || header.ident != UTFS_IDENTIFIER || header.version != UTFS_VERSION_V1)
         {
             break;
         }
@@ -226,6 +225,7 @@ utfs_result_e utfs_save()
     uint8_t * bptr;
     uint32_t x;
     uint32_t pos;
+    uint32_t written;
     utfs_header_t header;
     
     pos = _baseaddr;
@@ -248,8 +248,14 @@ utfs_result_e utfs_save()
             bptr = (uint8_t*)(file_list[x]->data);
             
             // Write header
-            pos += sys_write(pos,&header,sizeof(header));
-
+            written = sys_write(pos,&header,sizeof(header));
+            if(written != sizeof(header))
+            {
+                _utfs_log("Error writing header, fs full\n");
+                return RES_FILESYSTEM_FULL;
+            }
+            pos += written;
+                
             // Write data
             #ifdef UTFS_ENABLE_FLAGS
             if((file_list[x]->flags&SAVE_EXPLICIT)==0)
@@ -257,7 +263,12 @@ utfs_result_e utfs_save()
             if(true)
             #endif
             {
-                sys_write(pos,bptr,file_list[x]->size);
+                written = sys_write(pos,bptr,file_list[x]->size);
+                if(written != file_list[x]->size)
+                {
+                    _utfs_log("Error saving %u!=%u\n",written,file_list[x]->size);
+                    return RES_FILESYSTEM_FULL;
+                }
             }else{
                 _utfs_log("SAVE_EXPLICIT set, not writing '%s'\n",header.filename);
             }
@@ -278,6 +289,7 @@ utfs_result_e utfs_save_flush()
     uint8_t * bptr;
     uint32_t x;
     uint32_t pos;
+    uint32_t written;
     utfs_header_t header;
     
     pos = _baseaddr;
@@ -300,10 +312,21 @@ utfs_result_e utfs_save_flush()
             bptr = (uint8_t*)(file_list[x]->data);
             
             // Write header
-            pos += sys_write(pos,&header,sizeof(header));
+            written = sys_write(pos,&header,sizeof(header));
+            if(written!=sizeof(header))
+            {
+                _utfs_log("Error writing header, fs full\n");
+                return RES_FILESYSTEM_FULL;
+            }
+            pos += written;
 
             // Write data
-            sys_write(pos,bptr,file_list[x]->size);
+            written = sys_write(pos,bptr,file_list[x]->size);
+            if(written!=file_list[x]->size)
+            {
+                _utfs_log("Error writing data, fs full\n");
+                return RES_FILESYSTEM_FULL;
+            }
             
             // Increment by size
             pos += file_list[x]->size;
@@ -318,7 +341,6 @@ utfs_result_e utfs_save_flush()
 
 utfs_result_e utfs_load_file(utfs_file_t * f)
 {
-    uint8_t * bptr;
     uint32_t x,i,s;
     uint32_t pos;
     utfs_header_t header;
@@ -332,7 +354,7 @@ utfs_result_e utfs_load_file(utfs_file_t * f)
     {
         // Read the header
         i = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(i<=0 || header.ident != UTFS_IDENTIFIER)
+        if(i<=0 || header.ident != UTFS_IDENTIFIER || header.version != UTFS_VERSION_V1)
         {
             return RES_FILE_NOT_FOUND;
         }
@@ -389,7 +411,13 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
     // We can't save an individual file until the full set of files
     // have been written, so write them first
     if(_structure_saved==false){
-        utfs_save();
+        // Save the structure, fails if it overflows
+        // the medium; aka fs full
+        if(utfs_save()!=RES_OK)
+        {
+            _utfs_log("Fatal error, fs full\n");
+            return RES_FILESYSTEM_FULL;
+        }
     }
     
     pos = _baseaddr;
