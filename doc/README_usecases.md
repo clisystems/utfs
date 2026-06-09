@@ -18,7 +18,7 @@ Sequence of operation:
 
 ```
 struct system_data {
-  char serialnumer[12];
+  char serialnumber[12];
   char modelnumber[12];
 }
 
@@ -35,17 +35,17 @@ void main()
   utfs_file_t sys_file;
   utfs_file_t app_file;
 
-  utf_init();
+  utfs_init();
 
   sprintf(sys_file.filename,"system");
   sys_file.data = &(system_data);
   sys_file.size = sizeof(system_data);
-  utfs_register(&sys_file);
+  utfs_register(&sys_file, UTFS_NOFLAGS, UTFS_NOOPT);
 
   sprintf(app_file.filename,"appdata");
   app_file.data = &(application_data);
   app_file.size = sizeof(application_data);
-  utfs_register(&app_file);
+  utfs_register(&app_file, UTFS_NOFLAGS, UTFS_NOOPT);
 
   system_hardware_setup();
 
@@ -93,4 +93,4 @@ This flag exists to allow the system to save a specific file on-demand, and not 
 
 This flag should be used with caution, as a call to utfs_save() followed by a restart could cause any data in the current RAM of the explicit file to not be saved to the medium.
 
-Another corner case is where an explicit file grows after the 'structure' of the other files is written to the medium, and then the explicit file is written.  This could use the explicit file to overwrite the files after it on the medium.
+Another corner case is where an explicit file grows after the 'structure' of the other files is written to the medium, and then the explicit file is written.  This could cause the explicit file to overwrite the files after it on the medium. This is due to utfs_save_file() using the current size of the data vs the size of the structure written to medium.  This shall be discussed and addressed before this flag is approved as part of UTFS.
