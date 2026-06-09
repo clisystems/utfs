@@ -21,7 +21,7 @@
 uint32_t m_ticks = 0;
 int m_tick_ms=0;
 int led=0;
-char m_scratch[40];
+char m_scratch[50];
 
 
 // Data structures used in the system. This is the data

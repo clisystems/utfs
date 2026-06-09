@@ -25,7 +25,7 @@
 #undef printf
 #endif
 #define printf(...)      do{sprintf(m_scratch,__VA_ARGS__);Serial.print(m_scratch);}while(0)
-extern char m_scratch[40]; // m_scrach defined in .ino file
+extern char m_scratch[50]; // m_scrach defined in .ino file
 
 
 // Enable this #if to turn on _utfs_log() messages from UTFS. To see messages
@@ -74,7 +74,7 @@ static void _print_header(utfs_header_t * header);
 
 // Public functions
 // ----------------------------------------------------------------------------
-bool utfs_init(bool verbose)
+utfs_result_e utfs_init(bool verbose)
 {
     memset(file_list,0,sizeof(file_list));
     _structure_saved=false;
@@ -82,19 +82,19 @@ bool utfs_init(bool verbose)
     _baseaddr=0;
     //_utfs_log("_utfs_verbose: %d\n",_utfs_verbose);
     //_utfs_log("utfs_file_t size: %ld bytes\n",sizeof(utfs_file_t));
-    return true;
+    return RES_OK;
 }
 
-void utfs_baseaddress_set(uint32_t baseaddr)
+utfs_result_e utfs_baseaddress_set(uint32_t baseaddr)
 {
     _baseaddr = baseaddr;
-    return;
+    return RES_OK;
 }
 
-bool utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
+utfs_result_e utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
 {
     int x;
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     f->flags = flags;
     for(x=0;x<UTFS_MAX_FILES;x++)
     {
@@ -103,11 +103,16 @@ bool utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
             _utfs_log("Found empty slot %d\n",x);
             file_list[x] = f;
             return RES_OK;
-        }else if(strncmp(file_list[x]->filename,f->filename,UTFS_MAX_FILENAME+1)
-                    && (options&UTFS_OPT_REPLACE)==0){
-            _utfs_log("Found %s=%s, replacing\n",file_list[x]->filename,f->filename);
-            file_list[x] = f;
-            return RES_OK;
+        }else if(strncmp(file_list[x]->filename,f->filename,UTFS_MAX_FILENAME+1)==0){
+            if((options&UTFS_OPT_REPLACE)==UTFS_OPT_REPLACE)
+            {
+                _utfs_log("Found %s=%s, replacing\n",file_list[x]->filename,f->filename);
+                file_list[x] = f;
+                return RES_OK;
+            }else{
+                _utfs_log("Found %d, not overwriting\n",file_list[x]);
+                return RES_FILENAME_EXISTS;
+            }
         }
     }
     if(x==UTFS_MAX_FILES){
@@ -117,24 +122,23 @@ bool utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options)
     return RES_OK;
 }
 
-void utfs_unregister(utfs_file_t * f)
+utfs_result_e utfs_unregister(utfs_file_t * f)
 {
     int x;
-    if(!f) return;
+    if(!f) return RES_PARAM_ERROR;
     for(x=0;x<UTFS_MAX_FILES;x++)
     {
         if(file_list[x]==f){
             _utfs_log("Removed %s at position %d\n",file_list[x]->filename,x);
             file_list[x] = NULL;
-            return;
+            return RES_OK;
         }
     }
-    return;
+    return RES_FILE_NOT_FOUND;
 }
 
 utfs_result_e utfs_load()
 {
-    uint8_t * bptr;
     uint32_t x,f;
     uint32_t pos;
     utfs_header_t header;
@@ -148,7 +152,7 @@ utfs_result_e utfs_load()
     {
         // Read the header
         f = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(f<=0 || header.ident != UTFS_IDENTIFIER)
+        if(f<=0 || header.ident != UTFS_IDENTIFIER || header.version != UTFS_VERSION_V1)
         {
             break;
         }
@@ -158,7 +162,7 @@ utfs_result_e utfs_load()
         // Find the file
         for(f=0;f<UTFS_MAX_FILES;f++)
         {
-            if(strncmp(file_list[f]->filename,header.filename,UTFS_MAX_FILENAME+1)==0)
+            if(file_list[f]!=NULL && strncmp(file_list[f]->filename,header.filename,UTFS_MAX_FILENAME+1)==0)
             {
                 _utfs_log("Found match, position %d\n",f);
                 break;
@@ -317,12 +321,11 @@ utfs_result_e utfs_save_flush()
 
 utfs_result_e utfs_load_file(utfs_file_t * f)
 {
-    uint8_t * bptr;
     uint32_t x,i,s;
     uint32_t pos;
     utfs_header_t header;
     
-    if(!f) return RES_FILE_NOT_FOUND;
+    if(!f) return RES_PARAM_ERROR;
 
     pos = _baseaddr;
 
@@ -331,14 +334,14 @@ utfs_result_e utfs_load_file(utfs_file_t * f)
     {
         // Read the header
         i = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(i<=0 || header.ident != UTFS_IDENTIFIER)
+        if(i<=0 || header.ident != UTFS_IDENTIFIER || header.version != UTFS_VERSION_V1)
         {
             return RES_FILE_NOT_FOUND;
         }
         pos += sizeof(header);
         
         // is it a match?
-        if(strncmp(f->filename,file_list[x]->filename,UTFS_MAX_FILENAME)!=0)
+        if(file_list[x]==NULL || strncmp(f->filename,file_list[x]->filename,UTFS_MAX_FILENAME+1)!=0)
         {
             // No, just skip the data
             pos += header.size;
@@ -383,7 +386,7 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
     uint32_t pos;
     utfs_header_t header;
     
-    if(!f) return RES_FILE_NOT_FOUND;
+    if(!f) return RES_PARAM_ERROR;
     
     // We can't save an individual file until the full set of files
     // have been written, so write them first
@@ -398,7 +401,7 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
     {
         if(file_list[x]!=NULL)
         {
-            if(strncmp(f->filename,file_list[x]->filename, UTFS_MAX_FILENAME)==0)
+            if(strncmp(f->filename,file_list[x]->filename, UTFS_MAX_FILENAME+1)==0)
             {
                 _utfs_log("Writing file %s, id %d at pos %d\n",f->filename,x,pos);
                 memset(&header,0,sizeof(header));
@@ -427,37 +430,37 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
 }
 
 /// Utility functions
-bool utfs_set(utfs_file_t * f,char * name, void * data,uint32_t size)
+utfs_result_e utfs_set(utfs_file_t * f,char * name, void * data,uint32_t size)
 {
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     strncpy(f->filename,name,UTFS_MAX_FILENAME);
     f->data = data;
     f->size = size;
-    return true;
+    return RES_OK;
 }
-bool utfs_set_filename(utfs_file_t * f,char * name)
+utfs_result_e utfs_set_filename(utfs_file_t * f,char * name)
 {
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     strncpy(f->filename,name,UTFS_MAX_FILENAME);
-    return true;
+    return RES_OK;
 }
-bool utfs_set_data(utfs_file_t *f,void * data,uint32_t size)
+utfs_result_e utfs_set_data(utfs_file_t *f,void * data,uint32_t size)
 {
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     f->data = data;
     f->size = size;
-    return true;
+    return RES_OK;
 }
 uint16_t utfs_file_signature(utfs_file_t * f)
 {
     if(!f) return 0;
     return f->signature;
 }
-bool utfs_file_signature_set(utfs_file_t * f, uint16_t sig)
+utfs_result_e utfs_file_signature_set(utfs_file_t * f, uint16_t sig)
 {
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     f->signature=sig;
-    return true;
+    return RES_OK;
 }
 const char * utfs_result_str(utfs_result_e res)
 {
@@ -474,7 +477,7 @@ const char * utfs_result_str(utfs_result_e res)
 }
 
 /// Debug functions
-void utfs_status()
+utfs_result_e utfs_status()
 {
     int x;
     int count=0;
@@ -483,11 +486,11 @@ void utfs_status()
         if(file_list[x])
         {
             count++;
-            printf("Entry %d: '%s' - %d bytes\n",x,file_list[x]->filename,file_list[x]->size);
+            printf("Entry %d: '%s' - %lu bytes\n",x,file_list[x]->filename,file_list[x]->size);
         }
     }
     if(count<=0) printf("No UTFS entries found\n");
-    return;
+    return RES_OK;
 }
 
 // Private functions
@@ -500,7 +503,7 @@ static void _print_header(utfs_header_t * header)
     printf(" flags: 0x%02X\n",header->flags);
     printf(" signature: 0x%04X\n",header->signature);
     printf(" unused: 0x%04X\n",header->unused);
-    printf(" size: %d\n",header->size);
+    printf(" size: %lu\n",header->size);
     printf(" filename: '%s'\n",header->filename);
     return;
 }
