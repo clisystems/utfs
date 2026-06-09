@@ -54,8 +54,8 @@ void main()
 
 
   // Check data loaded to see if it needs default values, defualt values, etc
-  if(sys_file.singature!=SIGNATURE_VALUE_SYS) // Invalid data, default data
-  if(app_file.singature!=SIGNATURE_VALUE_APP) // Invalid data, default data
+  if(sys_file.signature!=SIGNATURE_VALUE_SYS) // Invalid data, default data
+  if(app_file.signature!=SIGNATURE_VALUE_APP) // Invalid data, default data
 
   // data ready to use
   while(1){

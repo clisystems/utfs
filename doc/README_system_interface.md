@@ -4,13 +4,13 @@ This document proposes a system interface for UTFS files in an embedded system.
 
 In this document, the 'system interface for UTFS' shall be referred to as UTFS.
 
-Experience with C is expected
+Experience with C is expected.
 
 ### UTFS File System Paradigm
 
 Common file systems, including EXT4, FAT, NTFS, etc, support a traditional file system paradigm including open, read, write, close, where a file is open or closed, and open files can be read or written to.  Additionally, when open files are written, the user expects the file data to be stored on non-volatile storage implicitly.
 
-This paradigm works for many cases on modern computer systems, however data storage in an embedded system is more nuanced than larger computer systems. For example, the nonvolatile storage medium may be a fixed part flash memory with a limit to the number of writes per sector. In this case, a change or 'write' to a single byte of data may not require wiring to the non-volative storage, but rather waiting until all data is updated before 'flushing' to the non-volatile medium.
+This paradigm works for many cases on modern computer systems, however data storage in an embedded system is more nuanced than larger computer systems. For example, the nonvolatile storage medium may be a fixed part flash memory with a limit to the number of writes per sector. In this case, a change or 'write' to a single byte of data may not require writing to the non-volatile storage, but rather waiting until all data is updated before 'flushing' to the non-volatile medium.
 
 The proposed UTFS system interface deviates from a 'traditional' file system paradigm, all data is loaded at one time and written at one time.
 
@@ -61,6 +61,7 @@ typedef enum{
     RES_FILE_NOT_FOUND,
     RES_READ_ERROR,
     RES_WRITE_ERROR,
+    RES_PARAM_ERROR,
     RES_FILENAME_EXISTS,
     RES_FILESYSTEM_FULL,
     RES_INVALID_FS,
@@ -70,10 +71,10 @@ typedef enum{
 ### Function Prototypes
 
 ```
-bool utfs_init();
+utfs_result_e utfs_init(bool verbose);
 
-bool utfs_register(utfs_file_t * f);
-void utfs_unregister(utfs_file_t * f);
+utfs_result_e utfs_register(utfs_file_t * f, utfs_flags_e flags, utfs_options_e options);
+utfs_result_e utfs_unregister(utfs_file_t * f);
 
 utfs_result_e utfs_load();
 utfs_result_e utfs_save();
