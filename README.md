@@ -186,6 +186,38 @@ minimal code and RAM footprint.
 - Unencumbered by patents
 - Agnostic to the underlying memory architecture
 
+## Scope and guarantees
+
+UTFS is a way to **structure** data on a flat medium, not a fault-tolerant or journaling
+file system. It is the disciplined replacement for the one giant `struct` that bare-metal
+projects write to a fixed EEPROM address, and it inherits exactly that model's write
+semantics: data is laid out plainly, and a write is a write.
+
+What this means in practice:
+
+- **Writes are not atomic.** A power loss partway through `utfs_save()` can leave the medium
+  partially updated, the same as interrupting any raw write to EEPROM or flash. UTFS does not
+  make this worse; it does not pretend to make it go away.
+- **`save()` rewrites the structure from the base address.** Reordering or resizing files
+  moves the bytes after them. This keeps the format trivially simple and the footprint tiny.
+- **Corruption is detected at load, by you.** Set a `signature` per file, check it after
+  `utfs_load()`, and default or upgrade the data if it does not match. This is the idiomatic
+  way to handle blank, partial, or stale storage.
+
+### Deliberate non-goals
+
+UTFS does **not** implement journaling, atomic commit, wear-leveling, or bad-block
+management. These are real concerns, but they are policies, and they belong in a layer you
+choose, not baked into the format. Because the entire medium interface is two functions
+(`sys_read` / `sys_write`), you can put that layer underneath UTFS without changing a line of
+it: A/B bank the whole region and switch on a valid signature, keep a CRC'd redundant copy,
+commit through a scratch page, or sit UTFS on top of an EEPROM-emulation layer that is
+already atomic.
+
+The result is a format small enough to fit the parts that have no room for a full file
+system, with the structure you would otherwise hand-roll, and nothing you would have to fight
+to remove.
+
 # Theory of Operation
 
 UTFS was inspired by the structure of the TAR format, developed to store files on tape archives.
