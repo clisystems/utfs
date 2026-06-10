@@ -1,7 +1,11 @@
 /***********************************************************************
 * UTFS Library
 *
-* 2025 CLI Systems LLC <contact@clisystems.com>
+* Copyright (c) 2025 CLI Systems LLC <contact@clisystems.com>
+* https://clisystems.com
+*
+* SPDX-License-Identifier: MIT
+* See the LICENSE file in the project root for full license text.
 *
 * UTFS driver example, designed for Arduino Uno
 *
