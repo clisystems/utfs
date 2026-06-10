@@ -21,6 +21,7 @@ typedef enum{
     RES_FILE_NOT_FOUND,
     RES_READ_ERROR,
     RES_WRITE_ERROR,
+    RES_PARAM_ERROR,
     RES_FILENAME_EXISTS,
     RES_FILESYSTEM_FULL,
     RES_INVALID_FS,
@@ -43,12 +44,12 @@ extern "C"
 {
 #endif
 
-bool utfs_init(bool verbose);
+utfs_result_e utfs_init(bool verbose);
 
-void utfs_baseaddress_set(uint32_t baseaddr);
+utfs_result_e utfs_baseaddress_set(uint32_t baseaddr);
 
-bool utfs_register(utfs_file_t * f);
-void utfs_unregister(utfs_file_t * f);
+utfs_result_e utfs_register(utfs_file_t * f);
+utfs_result_e utfs_unregister(utfs_file_t * f);
 
 utfs_result_e utfs_load();
 utfs_result_e utfs_save();

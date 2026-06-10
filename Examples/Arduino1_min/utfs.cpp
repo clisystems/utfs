@@ -26,7 +26,7 @@
 #undef printf
 #endif
 #define printf(...)      do{sprintf(m_scratch,__VA_ARGS__);Serial.print(m_scratch);}while(0)
-extern char m_scratch[40]; // m_scrach defined in .ino file
+extern char m_scratch[50]; // m_scrach defined in .ino file
 
 
 // Enable this #if to turn on _utfs_log() messages from UTFS. To see messages
@@ -70,25 +70,25 @@ uint32_t sys_read(uint32_t address, void * ptr, uint32_t length);
 
 // Public functions
 // ----------------------------------------------------------------------------
-bool utfs_init(bool verbose)
+utfs_result_e utfs_init(bool verbose)
 {
     memset(file_list,0,sizeof(file_list));
     _structure_saved=false;
     _utfs_verbose=verbose;
     _baseaddr=0;
-    return true;
+    return RES_OK;
 }
 
-void utfs_baseaddress_set(uint32_t baseaddr)
+utfs_result_e utfs_baseaddress_set(uint32_t baseaddr)
 {
     _baseaddr = baseaddr;
-    return;
+    return RES_OK;
 }
 
-bool utfs_register(utfs_file_t * f)
+utfs_result_e utfs_register(utfs_file_t * f)
 {
     int x;
-    if(!f) return false;
+    if(!f) return RES_PARAM_ERROR;
     f->flags = 0;
     for(x=0;x<UTFS_MAX_FILES;x++)
     {
@@ -106,19 +106,19 @@ bool utfs_register(utfs_file_t * f)
     return RES_OK;
 }
 
-void utfs_unregister(utfs_file_t * f)
+utfs_result_e utfs_unregister(utfs_file_t * f)
 {
     int x;
-    if(!f) return;
+    if(!f) return RES_PARAM_ERROR;
     for(x=0;x<UTFS_MAX_FILES;x++)
     {
         if(file_list[x]==f){
             _utfs_log("Removed %s at position %d\n",file_list[x]->filename,x);
             file_list[x] = NULL;
-            return;
+            return RES_OK;
         }
     }
-    return;
+    return RES_FILE_NOT_FOUND;
 }
 
 utfs_result_e utfs_load()
