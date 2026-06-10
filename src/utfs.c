@@ -21,11 +21,11 @@
 // Types
 // ----------------------------------------------------------------------------
 typedef struct{
-    uint16_t ident;
+    uint16_t identifier;
     uint8_t version;
     uint8_t flags;
     uint16_t signature;
-    uint16_t unused;
+    uint16_t reserved;
     uint32_t size;
     char filename[12];
 }utfs_header_t;
@@ -145,7 +145,7 @@ utfs_result_e utfs_load()
     {
         // Read the header
         f = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(f<=0 || header.ident != UTFS_IDENTIFIER || header.version != UTFS_VERSION_V1)
+        if(f<=0 || header.identifier != UTFS_IDENTIFIER || header.version != UTFS_VERSION_V1)
         {
             break;
         }
@@ -237,11 +237,11 @@ utfs_result_e utfs_save()
         {
             _utfs_log("Writing file %d at pos %d\n",x,pos);
             memset(&header,0,sizeof(header));
-            header.ident = UTFS_IDENTIFIER;
+            header.identifier = UTFS_IDENTIFIER;
             header.version = UTFS_VERSION_V1;
             header.flags = ((file_list[x]->flags)&0x00FF);   // Save the lower byte of the flags
             header.signature = file_list[x]->signature;
-            header.unused = 0;
+            header.reserved = 0;
             header.size = file_list[x]->size;
             strncpy((char*)(header.filename),file_list[x]->filename,UTFS_MAX_FILENAME);
             
@@ -301,11 +301,11 @@ utfs_result_e utfs_save_flush()
         {
             _utfs_log("Writing file %d at pos %d\n",x,pos);
             memset(&header,0,sizeof(header));
-            header.ident = UTFS_IDENTIFIER;
+            header.identifier = UTFS_IDENTIFIER;
             header.version = UTFS_VERSION_V1;
             header.flags = ((file_list[x]->flags)&0x00FF);   // Save the lower byte of the flags
             header.signature = file_list[x]->signature;
-            header.unused = 0;
+            header.reserved = 0;
             header.size = file_list[x]->size;
             strncpy((char*)(header.filename),file_list[x]->filename,UTFS_MAX_FILENAME);
             
@@ -354,7 +354,7 @@ utfs_result_e utfs_load_file(utfs_file_t * f)
     {
         // Read the header
         i = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(i<=0 || header.ident != UTFS_IDENTIFIER || header.version != UTFS_VERSION_V1)
+        if(i<=0 || header.identifier != UTFS_IDENTIFIER || header.version != UTFS_VERSION_V1)
         {
             return RES_FILE_NOT_FOUND;
         }
@@ -431,11 +431,11 @@ utfs_result_e utfs_save_file(utfs_file_t * f)
             {
                 _utfs_log("Writing file %s, id %d at pos %d\n",f->filename,x,pos);
                 memset(&header,0,sizeof(header));
-                header.ident = UTFS_IDENTIFIER;
+                header.identifier = UTFS_IDENTIFIER;
                 header.version = UTFS_VERSION_V1;
                 header.flags = ((file_list[x]->flags)&0x00FF);   // Save the lower byte of the flags
                 header.signature = file_list[x]->signature;
-                header.unused = 0;
+                header.reserved = 0;
                 header.size = file_list[x]->size;
                 strncpy((char*)(header.filename),file_list[x]->filename,UTFS_MAX_FILENAME);
                 bptr = (uint8_t*)(file_list[x]->data);
@@ -525,11 +525,11 @@ utfs_result_e utfs_status()
 static void _print_header(utfs_header_t * header)
 {
     printf("Header:\n");
-    printf(" ident: 0x%04X\n",header->ident);
+    printf(" identifier: 0x%04X\n",header->identifier);
     printf(" version: %d\n",header->version);
     printf(" flags: 0x%02X\n",header->flags);
     printf(" signature: 0x%04X\n",header->signature);
-    printf(" unused: 0x%04X\n",header->unused);
+    printf(" reserved: 0x%04X\n",header->reserved);
     printf(" size: %d\n",header->size);
     printf(" filename: '%s'\n",header->filename);
     return;
