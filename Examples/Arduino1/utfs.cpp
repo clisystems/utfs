@@ -469,11 +469,12 @@ const char * utfs_result_str(utfs_result_e res)
     case RES_FILE_NOT_FOUND: return "RES_FILE_NOT_FOUND";
     case RES_READ_ERROR: return "RES_READ_ERROR";
     case RES_WRITE_ERROR: return "RES_WRITE_ERROR";
+    case RES_PARAM_ERROR: return "RES_PARAM_ERROR";
     case RES_FILENAME_EXISTS: return "RES_FILENAME_EXISTS";
     case RES_FILESYSTEM_FULL: return "RES_FILESYSTEM_FULL";
     case RES_INVALID_FS: return "RES_INVALID_FS";
     }
-    return "RES_UNKOWN";
+    return "RES_UNKNOWN";
 }
 
 /// Debug functions

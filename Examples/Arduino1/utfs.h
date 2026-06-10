@@ -47,7 +47,7 @@ typedef enum{
 	UTFS_NOFLAGS			= 0,
 #ifdef UTFS_ENABLE_FLAGS
 #ifdef UTFS_ENABLE_EXT_ATTR
-    UTFS_EXT_ATTR       = 0x0001
+    UTFS_EXT_ATTR       = 0x0001,
 #endif
     UTFS_LOAD_EXPLICIT  = 0x0100,
     UTFS_SAVE_EXPLICIT  = 0x0200,

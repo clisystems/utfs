@@ -500,7 +500,7 @@ const char * utfs_result_str(utfs_result_e res)
     case RES_FILESYSTEM_FULL: return "RES_FILESYSTEM_FULL";
     case RES_INVALID_FS: return "RES_INVALID_FS";
     }
-    return "RES_UNKOWN";
+    return "RES_UNKNOWN";
 }
 
 /// Debug functions
