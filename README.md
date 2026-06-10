@@ -145,8 +145,8 @@ UTFS is designed for resource-constrained parts:
 
 ## In-depth articles
 
-- [UTFS, a TAR-like File System for Embedded Systems](https://clisystems.com/article-UTFS.php)
-- [Using UTFS in an Embedded System](https://clisystems.com/article-UTFS-examples.php)
+- [UTFS, a TAR-like File System for Embedded Systems](https://clisystems.com/article-UTFS/)
+- [Using UTFS in an Embedded System](https://clisystems.com/article-UTFS-examples/)
 
 ---
 
