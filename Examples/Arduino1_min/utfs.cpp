@@ -123,7 +123,6 @@ utfs_result_e utfs_unregister(utfs_file_t * f)
 
 utfs_result_e utfs_load()
 {
-    uint8_t * bptr;
     uint32_t x,f;
     uint32_t pos;
     utfs_header_t header;
@@ -137,7 +136,7 @@ utfs_result_e utfs_load()
     {
         // Read the header
         f = sys_read(pos, (uint8_t*)&header, sizeof(header));
-        if(f<=0 || header.ident != UTFS_IDENTIFIER)
+        if(f==0 || header.ident != UTFS_IDENTIFIER)
         {
             break;
         }
@@ -146,6 +145,8 @@ utfs_result_e utfs_load()
         // Find the file
         for(f=0;f<UTFS_MAX_FILES;f++)
         {
+            if(file_list[f]==NULL) continue;
+            
             if(strncmp(file_list[f]->filename,header.filename,UTFS_MAX_FILENAME+1)==0)
             {
                 _utfs_log("Found match, %s at position %d\n",file_list[f]->filename,f);

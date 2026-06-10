@@ -98,7 +98,8 @@ void terminal_command(char * cmd)
     printf("Command: '%s'\n",cmd);
 
     // Dump the data structures
-    if(cmp_const(cmd,"dump")){
+    if(cmp_const(cmd,"dump"))
+    {
         printf("Sys:\n");
         printf("  File Sig: 0x%X\n",sysfile.signature);
         printf("  Serial: %s\n",sysdata.serialnumber);
@@ -198,8 +199,8 @@ uint32_t sys_write(uint32_t address, void * ptr, uint32_t length)
     data = (uint8_t*)ptr;
     if(!ptr) return 0;
     // Arduino UNO has 1024 bytes of EEPROM
-    if(address>1023) return 0;
-    if(address+length>1023) length=1023-address;
+    if(address>=1024) return 0;
+    if(address+length>1024) length=1024-address;
     for(x=0;x<length;x++)
     {
         if(ptr) EEPROM.write(address+x,data[x]);
@@ -215,8 +216,8 @@ uint32_t sys_read(uint32_t address, void * ptr, uint32_t length)
     data = (uint8_t*)ptr;
     if(!ptr) return 0;
     // Arduino UNO has 1024 bytes of EEPROM
-    if(address>1023) return 0;
-    if(address+length>1023) length=1023-address;
+    if(address>=1024) return 0;
+    if(address+length>1024) length=1024-address;
     for(x=0;x<length;x++)
     {
         if(ptr) data[x] = EEPROM.read(address+x);
@@ -262,26 +263,28 @@ void setup()
     res = utfs_load();
 
     // Example 1: How to handle RES_INVALID_FS on first run
-    #if 0
-    if(res==RES_INVALID_FS){
+    if(res==RES_INVALID_FS)
+    {
         // default data
         // save?
     }
-    #endif
 
     // Example 2: Use the 'signature' variable in the file
 
     // Check the signature after the data is loaded to see if
     // they match an expected value. If they do not match, then the
     // data is not correct and set the default values
-    if(sysfile.signature != 0xA1){
+    if(sysfile.signature != 0xA1)
+    {
         printf("Default sysdata\n");
         memset(&sysdata,0,sizeof(sysdata));
         sysfile.signature=0xA1;
     }
-    if(appfile.signature != 0xF2){
+    if(appfile.signature != 0xF2)
+    {
 
-        if(appfile.signature==0xA2){
+        if(appfile.signature==0xA2)
+        {
             // upgrade the data from an earlier structure!
         }else{
             printf("Default appdata\n");
