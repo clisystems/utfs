@@ -74,10 +74,10 @@ make
 REPL commands (`load`, `save`, `flush`, `utfs`, `status`, `value N`, `exit`) exercise loading,
 saving, and inspecting stored data.
 
-## Try it on an Arduino Uno
+## Try it on an ATMega328 Arduino Uno
 
 The `Arduino1` example builds straight from the Arduino IDE and packs **two separate files**
-into the Uno's 1 KB of EEPROM: a `system` file (serial and model number) and an `appdata` file
+into the ATMega328's 1 KB of EEPROM: a `system` file (serial and model number) and an `appdata` file
 (LED blink speed). The entire EEPROM driver is the two functions UTFS needs, wired directly to
 the Arduino `EEPROM` library:
 
